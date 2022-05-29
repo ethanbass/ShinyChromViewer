@@ -6,7 +6,7 @@ ShinyChromViewer is a shiny gadget for interactively viewing 3D chromatograms. I
 
 ## Installation
 
-`ShinyChromViewer` can be installed from, using `devtools` as follows:
+`ShinyChromViewer` can be installed from GitHub as follows:
 
 ```
 install.packages("devtools")
