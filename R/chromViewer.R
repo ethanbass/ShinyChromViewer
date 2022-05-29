@@ -1,7 +1,7 @@
 #' Shiny gadget for viewing chromatograms
 #' @name chrom_viewer
 #' @aliases chrom_viewer
-#' @import shiny
+#' @rawNamespace import(shiny, except = c(dataTableOutput, renderDataTable))
 #' @import shinydashboard
 #' @import shinyWidgets
 #' @import chromatographR
@@ -11,6 +11,10 @@
 #' @param peak_table A \code{peak_table} object.
 #' @param chrom_list A list of chromatograms.
 #' @return No return value.
+#' @examplesIf interactive()
+#' data(Sa_warp)
+#' data(pk_tab)
+#' chrom_viewer(pk_tab)
 #' @author Ethan Bass
 #' @export chrom_viewer
 chrom_viewer <- function(peak_table, chrom_list){

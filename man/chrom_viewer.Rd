@@ -17,6 +17,13 @@ No return value.
 \description{
 Shiny gadget for viewing chromatograms
 }
+\examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+data(Sa_warp)
+data(pk_tab)
+chrom_viewer(pk_tab)
+\dontshow{\}) # examplesIf}
+}
 \author{
 Ethan Bass
 }
