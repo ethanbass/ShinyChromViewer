@@ -2,7 +2,7 @@
 
 ## Overview
 
-ShinyChromViewer is a shiny gadget for interactively viewing 3D chromatograms. It is mainly meant as an add-on for [chromatographR](https://ethanbass.github.io/chromatographR).
+ShinyChromViewer is a shiny gadget for interactively viewing 3D chromatograms. It is mainly meant to be used in conjunction with [chromatographR](https://ethanbass.github.io/chromatographR) as an add-on.
 
 ## Installation
 
