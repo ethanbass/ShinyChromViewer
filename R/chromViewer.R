@@ -25,11 +25,14 @@ chrom_viewer <- function(peak_table, chrom_list){
     if (inherits(chrom_list, "try-error")) stop("Chromatograms not found!")
   }
   data <- tidy_chrom_converter(chrom_list)
-  peak_table <- summarize_peak_info(peak_table)
+  if (!missing(peak_table)){
+    peak_table <- summarize_peak_info(peak_table)
+    tab <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
+  } else{
+    tab <- data.frame()}
   chrom_names <- unique(data$chr)
   rts <- filter(data, chr == unique(data$chr)[1] & lambda == data$lambda[1]) %>%
     .[["rt"]] %>% as.numeric
-  # tab <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
 
   header <- dashboardHeader(title = "chromViewer")
 
@@ -130,11 +133,11 @@ chrom_viewer <- function(peak_table, chrom_list){
     })
 
     ### peak table
-    tab <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
-    output$peak_table <- DT::renderDataTable(tab, selection="single",
-                                             options = list(
-                                               columnDefs = list(list(searchable = FALSE, targets = 0))
-                                             ), filter = 'top')
+      # tab <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
+      output$peak_table <- DT::renderDataTable(tab, selection="single",
+                                               options = list(
+                                                 columnDefs = list(list(searchable = FALSE, targets = 0))
+                                               ), filter = 'top')
 
     ### side bar
     output$lambda_controls <- renderUI({
