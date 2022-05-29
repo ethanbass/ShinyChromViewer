@@ -17,7 +17,8 @@ devtools::install_github("https://github.com/ethanbass/chromViewer/")
 
 ```
 library(chromatographR)
+library(chromViewer)
 data(Sa_warp)
 data(pk_tab)
-chromViewer::chrom_viewer(pk_tab)
+chrom_viewer(pk_tab)
 ```
