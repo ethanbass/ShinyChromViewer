@@ -25,6 +25,7 @@ chrom_viewer <- function(peak_table, chrom_list){
   chrom_names <- unique(data$chr)
   rts <- filter(data, chr == unique(data$chr)[1] & lambda == data$lambda[1]) %>%
     .[["rt"]] %>% as.numeric
+  # tab <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
 
   header <- dashboardHeader(title = "chromViewer")
 
@@ -83,7 +84,7 @@ chrom_viewer <- function(peak_table, chrom_list){
           });
       "))
             ),
-            fluidRow(dataTableOutput("peak_table"))
+            fluidRow(DT::dataTableOutput("peak_table"))
     )
   )
   )
