@@ -36,7 +36,7 @@ chrom_viewer <- function(peak_table, chrom_list){
   rts <- filter(data, chr == unique(data$chr)[1] & lambda == data$lambda[1]) %>%
     .[["rt"]] %>% as.numeric
 
-  header <- dashboardHeader(title = "chromViewer")
+  header <- dashboardHeader(title = "ShinyChromViewer")
 
   sidebar <- dashboardSidebar(
     sidebarMenu(
@@ -56,27 +56,31 @@ chrom_viewer <- function(peak_table, chrom_list){
 
       uiOutput("lambda_controls"),
       uiOutput("chrom_controls"),
-      actionButton("save_spectrum", "Save spectrum"),
-      actionButton("save_both", "Save screenshot")
+      actionButton("save_both", "Save screenshot"),
+      actionButton("save_spectrum", "Save spectrum")
     ))
 
   body <- dashboardBody(tabItems(
     tabItem(tabName = "trace",
-            fluidRow(plotOutput("spectrum", height = 300,
-                                dblclick="spectrum_dbl",
-                                brush = brushOpts(
-                                  id = "spectrum_brush",
-                                  resetOnNew = TRUE
-                                ))
-            ),
-            fluidRow(plotOutput("plot1", height = 300,
-                                click = "trace_click",
-                                dblclick = "trace_dbl",
-                                brush = brushOpts(
-                                  id = "trace_brush",
-                                  resetOnNew = TRUE
-                                )),
-                     tags$script(HTML("
+            column(5,
+                   br(),
+                   br(),
+                   fluidRow(plotOutput("spectrum", height = 250,
+                                       dblclick="spectrum_dbl",
+                                       brush = brushOpts(
+                                         id = "spectrum_brush",
+                                         resetOnNew = TRUE
+                                       ))
+                   ),
+                   br(),
+                   fluidRow(plotOutput("plot1", height = 250,
+                                       click = "trace_click",
+                                       dblclick = "trace_dbl",
+                                       brush = brushOpts(
+                                         id = "trace_brush",
+                                         resetOnNew = TRUE
+                                       )),
+                            tags$script(HTML("
           $('#plot1').mousedown(function(e) {
               var parentOffset = $(this).offset();
               var relX = e.pageX - parentOffset.left;
@@ -92,12 +96,13 @@ chrom_viewer <- function(peak_table, chrom_list){
               Shiny.setInputValue('action', Math.random());
           });
       "))
+                   )
             ),
-            fluidRow(
-              tabsetPanel(type = "tabs",
-                          tabPanel("Summary", DT::dataTableOutput("peak_summary")),
-                          tabPanel("Peak Table", DT::dataTableOutput("peak_table"))
-              )
+            column(7,
+                   tabsetPanel(type = "tabs",
+                               tabPanel("Summary", DT::dataTableOutput("peak_summary")),
+                               tabPanel("Peak Table", DT::dataTableOutput("peak_table"))
+                   )
             )
     )
   )
