@@ -33,6 +33,7 @@ chrom_viewer <- function(peak_table, chrom_list){
   } else{
     peak_sum <- data.frame()}
   chrom_names <- unique(data$chr)
+  lambdas <- unique(data$lambda)
   rts <- filter(data, chr == unique(data$chr)[1] & lambda == data$lambda[1]) %>%
     .[["rt"]] %>% as.numeric
 
@@ -50,12 +51,13 @@ chrom_viewer <- function(peak_table, chrom_list){
         options = list(create = TRUE),
         multiple = TRUE),
 
-      selectizeInput("select_chroms", "Select chromatograms",
-                     choices = chrom_names,
-                     multiple = TRUE),
-
       uiOutput("lambda_controls"),
+
+      uiOutput("select_chroms"),
+
+
       uiOutput("chrom_controls"),
+      # checkboxInput(inputId = "scale", label="Scale", value = FALSE),
       actionButton("save_both", "Save screenshot"),
       actionButton("save_spectrum", "Save spectrum")
     ))
@@ -175,10 +177,18 @@ chrom_viewer <- function(peak_table, chrom_list){
                                                columnDefs = list(list(searchable = FALSE, targets = 0))
                                              ), filter = 'top')
     ### side bar
+    output$select_chroms <- renderUI({
+      selectizeInput(
+        inputId="select_chroms",
+        label="Select chromatograms",
+        choices = chrom_names[!(chrom_names %in% params$chroms)],
+        multiple = TRUE)
+      })
+
     output$lambda_controls <- renderUI({
       checkboxGroupButtons(
         inputId = "lambda_selector",
-        label = "Select wavelengths",
+        label = "Wavelengths",
         selected = params$lambdas,
         choices = params$lambdas,
         status = "primary",
@@ -193,7 +203,7 @@ chrom_viewer <- function(peak_table, chrom_list){
     output$chrom_controls <- renderUI({
       checkboxGroupButtons(
         inputId = "chrom_selector",
-        label = "Select chromatograms",
+        label = "Chromatograms",
         choices = params$chroms,
         selected = params$chroms,
         status = "primary",
@@ -267,9 +277,10 @@ chrom_viewer <- function(peak_table, chrom_list){
       req(elements())
       updateSelectInput(session, "select_lambdas",
                         selected = character(0),
-                        choices = unique(data$lambda)
+                        choices = lambdas[!(lambdas %in% elements())]
       )
     })
+
     # select chromatograms
     observeEvent(input$select_chroms, {
       req(input$select_chroms)
@@ -281,7 +292,7 @@ chrom_viewer <- function(peak_table, chrom_list){
       req(chroms())
       updateSelectInput(session, "select_chroms",
                         selected = character(0),
-                        choices = chrom_names
+                        choices = chrom_names[!(chrom_names %in% chroms())]
       )
     })
 
