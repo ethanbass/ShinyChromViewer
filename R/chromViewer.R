@@ -27,9 +27,10 @@ chrom_viewer <- function(peak_table, chrom_list){
   data <- tidy_chrom_converter(chrom_list)
   if (!missing(peak_table)){
     peak_table <- summarize_peak_info(peak_table)
-    tab <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
+    peak_sum <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
+    peak_tab <- t(rbind(peak_table$pk_meta["rt",], peak_table$tab))
   } else{
-    tab <- data.frame()}
+    peak_sum <- data.frame()}
   chrom_names <- unique(data$chr)
   rts <- filter(data, chr == unique(data$chr)[1] & lambda == data$lambda[1]) %>%
     .[["rt"]] %>% as.numeric
@@ -91,7 +92,12 @@ chrom_viewer <- function(peak_table, chrom_list){
           });
       "))
             ),
-            fluidRow(DT::dataTableOutput("peak_table"))
+            fluidRow(
+              tabsetPanel(type = "tabs",
+                          tabPanel("Summary", DT::dataTableOutput("peak_summary")),
+                          tabPanel("Peak Table", DT::dataTableOutput("peak_table"))
+              )
+            )
     )
   )
   )
@@ -133,12 +139,16 @@ chrom_viewer <- function(peak_table, chrom_list){
     })
 
     ### peak table
-      # tab <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
-      output$peak_table <- DT::renderDataTable(tab, selection="single",
+    # tab <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
+    output$peak_summary <- DT::renderDataTable(peak_sum, selection="single",
                                                options = list(
                                                  columnDefs = list(list(searchable = FALSE, targets = 0))
                                                ), filter = 'top')
 
+    output$peak_table <- DT::renderDataTable(peak_tab, selection="single",
+                                             options = list(
+                                               columnDefs = list(list(searchable = FALSE, targets = 0))
+                                             ), filter = 'top')
     ### side bar
     output$lambda_controls <- renderUI({
       checkboxGroupButtons(
@@ -181,6 +191,13 @@ chrom_viewer <- function(peak_table, chrom_list){
     observeEvent(input$peak_table_rows_selected, {
       RT <- peak_table$pk_meta[3,input$peak_table_rows_selected]
       ret$rt <- which.min(abs(RT - rts))
+      # input$peak_table_rows_selected <- input$peak_summary_rows_selected
+    })
+
+    observeEvent(input$peak_summary_rows_selected, {
+      RT <- peak_table$pk_meta[3,input$peak_summary_rows_selected]
+      ret$rt <- which.min(abs(RT - rts))
+      # input$peak_summary_rows_selected <- input$peak_table_rows_selected
     })
 
     # When a double-click happens, check if there's a brush on the plot.
