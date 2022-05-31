@@ -1,4 +1,4 @@
-#' Shiny gadget for viewing chromatograms
+##' Shiny gadget for viewing chromatograms
 #' @name chrom_viewer
 #' @aliases chrom_viewer
 #' @rawNamespace import(shiny, except = c(dataTableOutput, renderDataTable))
@@ -8,6 +8,7 @@
 #' @import DT
 #' @import ggplot2
 #' @importFrom dplyr filter
+#' @importFrom cowplot plot_grid
 #' @param peak_table A \code{peak_table} object.
 #' @param chrom_list A list of chromatograms.
 #' @return No return value.
@@ -108,7 +109,7 @@ chrom_viewer <- function(peak_table, chrom_list){
   server <- function(input, output, session) {
     # Trace plot --------------------------------------------------------
     ranges <- reactiveValues(x = NULL, y = NULL)
-    ret <- reactiveValues(rt = 1)
+    ret <- reactiveValues(rt = 1, peak = 1)
     # rt <- reactiveVal(1)
     ranges2 <- reactiveValues(x = NULL, y = NULL)
     params <- reactiveValues(lambdas = c("210"), chroms=chrom_names[1])
@@ -120,22 +121,41 @@ chrom_viewer <- function(peak_table, chrom_list){
     output$plot1 <- renderPlot({
       # time <- unique(data$rt)[ret$rt]
       # rts <- data$rt[!duplicated(data$rt)]
-      p<-data %>% filter(lambda %in% params$lambdas & chr %in% params$chroms) %>%
+      p_trace<-data %>% filter(lambda %in% params$lambdas & chr %in% params$chroms) %>%
         ggplot(aes(rt, value, group=interaction(lambda,chr))) +
         geom_line(aes(color=chr, linetype=lambda)) +
         geom_label(data = subset(data, rt==ret$rt), aes(label=rt)) +
         geom_vline(xintercept = ret$rt, linetype="dotted", col="red") +
         coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = FALSE) +
         scale_x_discrete(breaks = scales::breaks_pretty(1))
-      p+ggtheme
+      p_trace + ggtheme
     })
 
     output$spectrum <- renderPlot({
       time <- rts[ret$rt]
-      p<-data %>% filter(rt %in% time & chr %in% params$chroms) %>% ggplot(aes(lambda, value, group=chr)) +
+      p_spec <- data %>% filter(rt %in% time & chr %in% params$chroms) %>% ggplot(aes(lambda, value, group=chr)) +
         coord_cartesian(xlim = ranges2$x, ylim = ranges2$y, expand = FALSE) +
         geom_line(aes(color=chr)) + scale_x_discrete(breaks = scales::breaks_extended(10))
-      p +ggtheme #+ theme(legend.position="top")
+      p_spec + ggtheme #+ theme(legend.position="top")
+    })
+
+    p_spec <- reactive({
+      time <- rts[ret$rt]
+      p_spec <- data %>% filter(rt %in% time & chr %in% params$chroms) %>% ggplot(aes(lambda, value, group=chr)) +
+        coord_cartesian(xlim = ranges2$x, ylim = ranges2$y, expand = FALSE) +
+        geom_line(aes(color=chr)) + scale_x_discrete(breaks = scales::breaks_extended(10))
+      p_spec + ggtheme #+ theme(legend.position="top")
+    })
+
+    p_trace <- reactive({
+      p_trace <- data %>% filter(lambda %in% params$lambdas & chr %in% params$chroms) %>%
+        ggplot(aes(rt, value, group=interaction(lambda,chr))) +
+        geom_line(aes(color=chr, linetype=lambda)) +
+        geom_label(data = subset(data, rt==ret$rt), aes(label=rt)) +
+        geom_vline(xintercept = ret$rt, linetype="dotted", col="red") +
+        coord_cartesian(xlim = ranges$x, ylim = ranges$y, expand = FALSE) +
+        scale_x_discrete(breaks = scales::breaks_pretty(1))
+      p_trace + ggtheme
     })
 
     ### peak table
@@ -184,6 +204,7 @@ chrom_viewer <- function(peak_table, chrom_list){
     observeEvent(input$trace_click, {
       if(input$x1 == input$x2 && input$y1 == input$y2){
         ret$rt <- input$trace_click$x
+        ret$peak <- names(which.min(abs(peak_table$pk_meta["rt",] - rts[ret$rt])))
         # print(ret$rt)
       }
     })
@@ -191,13 +212,13 @@ chrom_viewer <- function(peak_table, chrom_list){
     observeEvent(input$peak_table_rows_selected, {
       RT <- peak_table$pk_meta[3,input$peak_table_rows_selected]
       ret$rt <- which.min(abs(RT - rts))
-      # input$peak_table_rows_selected <- input$peak_summary_rows_selected
+      ret$peak <- colnames(peak_table$tab)[input$peak_table_rows_selected]
     })
 
     observeEvent(input$peak_summary_rows_selected, {
       RT <- peak_table$pk_meta[3,input$peak_summary_rows_selected]
       ret$rt <- which.min(abs(RT - rts))
-      # input$peak_summary_rows_selected <- input$peak_table_rows_selected
+      ret$peak <- colnames(peak_table$tab)[input$peak_summary_rows_selected]
     })
 
     # When a double-click happens, check if there's a brush on the plot.
@@ -274,8 +295,20 @@ chrom_viewer <- function(peak_table, chrom_list){
       params$lambdas <- selected
       elements(selected)
     })
-  }
 
+    ### save
+    observeEvent(input$save_both, {
+      filename <- paste0(paste(ret$peak, rts[ret$rt], sep="_"), ".png")
+      ggsave(filename= filename,
+             plot=cowplot::plot_grid(p_spec(), p_trace(), nrow = 2), device = "png")
+    })
+
+
+    observeEvent(input$save_spectrum, {
+      ggsave(filename=paste0(paste(ret$peak, rts[ret$rt], sep="_"),".png"),
+             plot=p_spec(), device = "png")
+    })
+  }
 
   runGadget(ui, server)
 }
