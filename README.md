@@ -27,4 +27,4 @@ chrom_viewer(pk_tab)
 
 To view spectra, click on the trace plot (*lower left panel*) or the peak table (*right panel*).
 
-<img src="man/images/ShinyChromViewerUI.png"></img>
+<img src="man/images/shinyChromViewerUI.png"></img>
