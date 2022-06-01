@@ -30,8 +30,11 @@ chrom_viewer <- function(peak_table, chrom_list){
     peak_table <- summarize_peak_info(peak_table)
     peak_sum <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
     peak_tab <- t(rbind(peak_table$pk_meta["rt",], peak_table$tab))
+    pk_tab_exists <- TRUE
   } else{
-    peak_sum <- data.frame()}
+    peak_sum <- data.frame()
+    peak_tab <- data.frame()
+    pk_tab_exists <- FALSE}
   chrom_names <- unique(data$chr)
   lambdas <- unique(data$lambda)
   rts <- filter(data, chr == unique(data$chr)[1] & lambda == data$lambda[1]) %>%
@@ -166,7 +169,6 @@ chrom_viewer <- function(peak_table, chrom_list){
     })
 
     ### peak table
-    # tab <- t(peak_table$pk_meta[c("rt","sd","mean_area","median_area","sd_area"),])
     output$peak_summary <- DT::renderDataTable(peak_sum, selection="single",
                                                options = list(
                                                  columnDefs = list(list(searchable = FALSE, targets = 0))
@@ -219,8 +221,9 @@ chrom_viewer <- function(peak_table, chrom_list){
     observeEvent(input$trace_click, {
       if(input$x1 == input$x2 && input$y1 == input$y2){
         ret$rt <- input$trace_click$x
-        ret$peak <- names(which.min(abs(peak_table$pk_meta["rt",] - rts[ret$rt])))
-        # print(ret$rt)
+        if (pk_tab_exists){
+          ret$peak <- names(which.min(abs(peak_table$pk_meta["rt",] - rts[ret$rt])))
+        }
       }
     })
 
