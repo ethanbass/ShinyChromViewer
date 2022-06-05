@@ -6,7 +6,7 @@ ShinyChromViewer is an Shiny gadget for interactive viewing and exploration of 3
 
 ## Installation
 
-`ShinyChromViewer` can be installed from GitHub as follows:
+ShinyChromViewer can be installed from GitHub as follows:
 
 ```
 install.packages("devtools")
@@ -15,7 +15,7 @@ devtools::install_github("https://github.com/ethanbass/ShinyChromViewer/")
 
 ## Usage
 
-To run `ShinyChromConverter` you should have a list of chromatograms in `matrix` format. You can also provide `peak_table` object produced by `chromatographR`. The script below loads the example data from `chromatographR` and launches the `ShinyChromViewer`. 
+To run ShinyChromConverter you must provide a list of chromatograms in `matrix` format. In addition, you can provide a `peak_table` object produced by [chromatographR](https://ethanbass.github.io/chromatographR). The script below loads the example data from chromatographR and launches the `chrom_viewer`. 
 
 ```
 library(chromatographR)
