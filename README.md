@@ -14,8 +14,8 @@ ShinyChromViewer is an Shiny gadget for interactive viewing and exploration of 3
 ShinyChromViewer can be installed from GitHub as follows:
 
 ```
-install.packages("devtools")
-devtools::install_github("https://github.com/ethanbass/ShinyChromViewer/")
+if (!require("pak", quietly=TRUE)) install.packages("pak")
+pak::pak("ethanbass/ShinyChromViewer")
 ```
 
 Or install directly from my R Universe repo:
